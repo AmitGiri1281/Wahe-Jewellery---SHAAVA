@@ -1,0 +1,347 @@
+{%- style -%}
+  /* Dynamic CSS Variables */
+  :root {
+    --shaava-bg: {{ section.settings.background }};
+    --shaava-text: {{ section.settings.text_color }};
+    --shaava-overlay: {{ section.settings.overlay_color | default: '#000000' }};
+    --shaava-overlay-opacity: {{ section.settings.overlay_opacity | divided_by: 100.0 }};
+  }
+{%- endstyle -%}
+
+{% schema %}
+{
+  "name": "⚡ SHAAVA Collection",
+  "class": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Heading",
+      "default": "SHAAVA Collection"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description",
+      "default": "<p>Timeless minimalism reimagined.</p>"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Select Collection"
+    },
+    {
+      "type": "range",
+      "id": "product_limit",
+      "min": 4,
+      "max": 12,
+      "step": 1,
+      "label": "Products to Show",
+      "default": 4
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button Text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "color",
+      "id": "background",
+      "label": "Background",
+      "default": "#F9F9F9"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "overlay_color",
+      "label": "Hover Overlay Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "overlay_opacity",
+      "min": 0,
+      "max": 90,
+      "step": 5,
+      "unit": "%",
+      "label": "Hover Overlay Opacity",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Advanced Animations"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_parallax",
+      "label": "Enable Parallax Scroll Effect",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_stagger",
+      "label": "Enable Staggered Animations",
+      "default": true
+    }
+  ],
+  "presets": [
+    {
+      "name": "⚡ SHAAVA Collection"
+    }
+  ]
+}
+{% endschema %}
+
+<style>
+  /* Core Styles */
+  #shopify-section-{{ section.id }} {
+    background: var(--shaava-bg);
+    padding: clamp(3rem, 5vw, 6rem);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shaava-container {
+    max-width: min(90vw, 1400px);
+    margin: 0 auto;
+    text-align: center;
+    color: var(--shaava-text);
+    position: relative;
+    z-index: 2;
+    {% if section.settings.enable_parallax %}
+    transform-style: preserve-3d;
+    {% endif %}
+  }
+
+  /* Typography */
+  .shaava-title {
+    font-size: clamp(1.8rem, 4vw, 3.5rem);
+    margin-bottom: 1.5rem;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .shaava-description {
+    max-width: 600px;
+    margin: 0 auto clamp(2rem, 4vw, 3rem);
+    font-size: clamp(1rem, 1.2vw, 1.2rem);
+    line-height: 1.6;
+    opacity: 0;
+    animation: fadeIn 1s 0.3s ease-out forwards;
+  }
+
+  /* Product Grid - Advanced Layout */
+  .shaava-products {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(250px, 100%), 1fr));
+    gap: clamp(1rem, 2vw, 2rem);
+    margin: clamp(2rem, 4vw, 4rem) 0;
+  }
+
+  .shaava-product {
+    position: relative;
+    overflow: hidden;
+    border-radius: 8px;
+    aspect-ratio: 3/4;
+    transform: translateY(30px);
+    opacity: 0;
+    animation: fadeInUp 0.6s ease-out forwards;
+    {% if section.settings.enable_stagger %}
+    animation-delay: calc(var(--index) * 0.1s);
+    {% endif %}
+  }
+
+  .shaava-product:nth-child(1) { --index: 1; }
+  .shaava-product:nth-child(2) { --index: 2; }
+  .shaava-product:nth-child(3) { --index: 3; }
+  .shaava-product:nth-child(4) { --index: 4; }
+
+  .shaava-product__inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .shaava-product:hover .shaava-product__inner {
+    transform: scale(1.03);
+  }
+
+  .shaava-product__image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .shaava-product:hover .shaava-product__image {
+    transform: scale(1.05);
+  }
+
+  .shaava-product__overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--shaava-overlay);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    mix-blend-mode: multiply;
+  }
+
+  .shaava-product:hover .shaava-product__overlay {
+    opacity: var(--shaava-overlay-opacity);
+  }
+
+  .shaava-product__info {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 1.5rem;
+    text-align: left;
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    z-index: 2;
+  }
+
+  .shaava-product:hover .shaava-product__info {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  /* Instagram handle container style */
+  .instagram-handle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+
+  /* "Shop Now" button hover style */
+  .shaava-btn:hover {
+    background-color: #333;
+    color: white;
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+  }
+
+  /* Adjust padding in the product grid so products don't look too tight */
+  .shaava-products {
+    padding: 1rem 0;
+  }
+
+  /* Button Styles */
+  .shaava-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--shaava-text);
+    color: var(--shaava-bg);
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    text-decoration: none;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform: translateY(20px);
+    opacity: 0;
+    animation: fadeInUp 0.8s 0.6s ease-out forwards;
+  }
+
+  .shaava-btn:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  }
+
+  /* Animations */
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  /* Parallax Effect */
+  {% if section.settings.enable_parallax %}
+  @media (prefers-reduced-motion: no-preference) {
+    .shaava-container::before {
+      content: '';
+      position: absolute;
+      top: -10%;
+      left: -10%;
+      width: 120%;
+      height: 120%;
+      background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+      z-index: -1;
+      transform: translateZ(-1px) scale(1.2);
+      will-change: transform;
+    }
+  }
+  {% endif %}
+
+  /* Ultra-Wide Screens */
+  @media (min-width: 2000px) {
+    .shaava-products {
+      grid-template-columns: repeat(4, minmax(300px, 1fr));
+    }
+  }
+</style>
+
+<div class="shaava-container">
+  <h2 class="shaava-title">{{ section.settings.title }}</h2>
+  <div class="shaava-description">{{ section.settings.description }}</div>
+  
+  <div class="shaava-products">
+    {% assign collection = collections[section.settings.collection] %}
+    {% for product in collection.products limit: section.settings.product_limit %}
+      <div class="shaava-product">
+        <a href="{{ product.url }}" class="shaava-product__inner">
+          <img 
+            class="shaava-product__image"
+            src="{{ product.featured_image | img_url: '800x' }}" 
+            alt="{{ product.title }}"
+            loading="lazy"
+            width="800"
+            height="{{ 800 | divided_by: product.featured_image.aspect_ratio | ceil }}"
+          >
+          <div class="shaava-product__overlay"></div>
+          <div class="shaava-product__info">
+            <h3 style="color: white; margin-bottom: 0.5rem;">{{ product.title }}</h3>
+            <p style="color: white;">{{ product.price | money }}</p>
+          </div>
+        </a>
+      </div>
+    {% endfor %}
+  </div>
+  
+  <a href="/collections/{{ collection.handle }}" class="shaava-btn">
+    {{ section.settings.button_text | default: "Shop Now" }}
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 12H19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      <path d="M12 5L19 12L12 19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </a>
+</div>
